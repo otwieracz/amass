@@ -1,59 +1,48 @@
 ######################################
-# Makefile by CubeMX2Makefile.py
-######################################
+## Basic configuration
+TARGET_NAME = stm32f3+freertos
+BUILD_DIR   = build
+# Flash offset 
+FLASH       = 0x8000000
+# GDB listen port
+GDB_PORT    = 4242
+# DEBUG flag
+DEBUG       = 1
+# Optimization
+OPT         = -O0
 
-######################################
-# target
-######################################
-TARGET = stm32f3+freertos
-
-######################################
-# building variables
-######################################
-# debug build?
-DEBUG = 1
-# optimization
-OPT = -O0
 
 #######################################
-# binaries
-#######################################
-CROSS = /usr/gcc-arm-none-eabi-4_9-2015q2/bin/arm-none-eabi-
-CC = $(CROSS)gcc
-AS = $(CROSS)gcc -x assembler-with-cpp
-CP = $(CROSS)objcopy
-AR = $(CROSS)ar
-SZ = $(CROSS)size
-HEX = $(CP) -O ihex
-BIN = $(CP) -O binary -S
-QSTLINK2 = /usr/bin/qstlink2
-
-#######################################
-# pathes
-#######################################
-# source path
-# Build path
-BUILD_DIR = build
+# Toolchain configuration
+CROSS      = /usr/gcc-arm-none-eabi-4_9-2015q2/bin/arm-none-eabi-
+CC         = $(CROSS)gcc
+AS         = $(CROSS)gcc -x assembler-with-cpp
+CP         = $(CROSS)objcopy
+AR         = $(CROSS)ar
+SZ         = $(CROSS)size
+GDB        = gdb
+HEX        = $(CP) -O ihex
+BIN        = $(CP) -O binary
+STFLASH    = st-flash
+STUTIL     = st-util
+START_STOP = start-stop-daemon
 
 ######################################
-# source
+## Toolchain flags
+ASFLAGS   = -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -Wall -fdata-sections -ffunction-sections
+CFLAGS    = -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -Wall -fdata-sections -ffunction-sections
+# Generate dependency information
+CFLAGS   += -MD -MP -MF .dep/$(@F).d
+# Linker config
+# ARM linker script
+LDSCRIPT  = arm-gcc-link.ld
+LIBS      = -lc -lm -lnosys
+LIBDIR    =
+LDFLAGS   = -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET_NAME).map,--cref -Wl,--gc-sections
+
 ######################################
-
-## Not included components
-# Put under C_SOURCES to include \
-Drivers/BSP/Components/st7735/st7735.c \
-Drivers/BSP/Components/cs42l52/cs42l52.c \
-Drivers/BSP/Components/spfd5408/spfd5408.c \
-Drivers/BSP/Components/hx8347d/hx8347d.c \
-Drivers/BSP/Components/cs43l22/cs43l22.c \
-Drivers/BSP/Components/stlm75/stlm75.c \
-Drivers/BSP/Components/stts751/stts751.c \
-Drivers/BSP/Components/hx8347g/hx8347g.c \
-Drivers/BSP/Components/ili9328/ili9328.c \
-#
-
-## Included components
-C_SOURCES = \
+# Source configuration
+SRCS = \
   Drivers/CMSIS/Device/ST/STM32F3xx/Source/Templates/system_stm32f3xx.c \
   Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal.c \
   Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_cortex.c \
@@ -80,6 +69,7 @@ C_SOURCES = \
   Middlewares/Third_Party/FreeRTOS/Source/queue.c \
   Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
   Middlewares/Third_Party/FreeRTOS/Source/timers.c \
+  Middlewares/Third_Party/FreeRTOS-Plus-CLI/FreeRTOS_CLI.c \
   Src/hardware/stm32f3xx_hal_msp.c \
   Src/hardware/stm32f3xx_it.c \
   Src/hardware/hardware.c \
@@ -90,13 +80,8 @@ C_SOURCES = \
 ASM_SOURCES = \
   Drivers/CMSIS/Device/ST/STM32F3xx/Source/Templates/gcc/startup_stm32f303xc.s
 
-#######################################
-# CFLAGS
-#######################################
-# macros for gcc
-AS_DEFS =
-C_DEFS = -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F303xC
-# includes for gcc
+######################################
+# Include directories
 AS_INCLUDES = -I../../Inc
 C_INCLUDES  = -ISrc
 C_INCLUDES += -IInc
@@ -107,38 +92,38 @@ C_INCLUDES += -IDrivers/BSP/Components
 C_INCLUDES += -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
 C_INCLUDES += -IMiddlewares/Third_Party/FreeRTOS/Source/include
 C_INCLUDES += -IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS
+C_INCLUDES += -IMiddlewares/Third_Party/FreeRTOS-Plus-CLI/FreeRTOS_CLI
 C_INCLUDES += -IDrivers/CMSIS/Include
 C_INCLUDES += -IDrivers/CMSIS/Device/ST/STM32F3xx/Include
-# compile gcc flags
-ASFLAGS = -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
-CFLAGS = -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
-ifeq ($(DEBUG), 1)
-CFLAGS += -g -gdwarf-2
-endif
-# Generate dependency information
-CFLAGS += -MD -MP -MF .dep/$(@F).d
+
 
 #######################################
-# LDFLAGS
+# End of user configuration.
+# You probably do not want to change
+# anything more.
 #######################################
-# link script
-LDSCRIPT = arm-gcc-link.ld
-# libraries
-LIBS = -lc -lm -lnosys
-LIBDIR =
-LDFLAGS = -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+
+# macros for gcc
+AS_DEFS  =
+C_DEFS   = -D__weak="__attribute__((weak))" -D__packed="__attribute__((__packed__))" -DUSE_HAL_DRIVER -DSTM32F303xC
+
+# Debug support
+ifeq ($(DEBUG), 1)
+CFLAGS  += -g -gdwarf-2
+endif
+
+# final CFLAGS
+ASFLAGS += $(AS_DEFS) $(AS_INCLUDES) $(OPT)
+CFLAGS  += $(C_DEFS) $(C_INCLUDES) $(OPT)
 
 # default action: build all
-all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
+all: $(BUILD_DIR)/$(TARGET_NAME).elf $(BUILD_DIR)/$(TARGET_NAME).hex $(BUILD_DIR)/$(TARGET_NAME).bin
 
 #######################################
-# build the application
-#######################################
-# list of objects
-OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
-vpath %.c $(sort $(dir $(C_SOURCES)))
-# list of ASM program objects
-OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
+# Build rules
+OBJS  = $(addprefix $(BUILD_DIR)/,$(notdir $(SRCS:.c=.o)))
+vpath %.c $(sort $(dir $(SRCS)))
+OBJS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
@@ -147,8 +132,8 @@ $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
-	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+$(BUILD_DIR)/$(TARGET_NAME).elf: $(OBJS) Makefile
+	$(CC) $(OBJS) $(LDFLAGS) -o $@
 	$(SZ) $@
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
@@ -160,22 +145,22 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir -p $@		
 
-## Device flashing
-flash: $(BUILD_DIR)/$(TARGET).bin
-	$(QSTLINK2) -c -w $<
+# Device flashing
+flash: $(BUILD_DIR)/$(TARGET_NAME).bin
+	$(STFLASH) write $< $(FLASH)
 
 burn: flash
 
+# Debugging
+gdb: $(BUILD_DIR)/$(TARGET_NAME).elf
+	rm -f $(BUILD_DIR)/st-util.pid
+	$(START_STOP) -b -m -p $(BUILD_DIR)/st-util.pid $(STUTIL)
+	$(GDB) -ex "target extended localhost:$(GDB_PORT)" -ex "load" $<; $(START_STOP) -K -p $(BUILD_DIR)/st-util.pid; echo "st-util should be stopped"
 
-#######################################
-# clean up
-#######################################
+#  Clean up
 clean:
 	-rm -fR .dep $(BUILD_DIR)
   
-#######################################
-# dependencies
-#######################################
+# Dependencies
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
 
-# *** EOF ***
