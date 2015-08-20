@@ -1,9 +1,14 @@
 /* error.h */
 
-#include "hardware.h"
+#ifndef _ERROR_H
+#define _ERROR_H
+
+#include "projdefs.h"
+#include "portmacro.h"
 
 void vErrorFatalLoop(void);
-#ifdef USE_FULL_ASSERT
-void assert_failed(uint8_t* file, uint32_t line);
-#endif
+void vErrorFatal(char* comment);
+void vErrorWarning(char* comment);
+
+#endif /* _ERROR_H */
 

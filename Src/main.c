@@ -7,10 +7,11 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "hardware.h"
 #include "error.h"
+#include "hardware/hardware.h"
 
 /* Tasks */
+#include "task/cli.h"
 #include "task/heartbeat.h"
 
 int main(void)
@@ -19,10 +20,11 @@ int main(void)
     vHardwareSetup();
 
     /* Start tasks */
+    vTaskCliStart();
     vTaskHeartbeatStart();
 
     /* Start RTOS scheduler */
-	vTaskStartScheduler();
+    vTaskStartScheduler();
 
     /* We should never get here */
     while (1) {

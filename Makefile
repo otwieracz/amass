@@ -20,7 +20,7 @@ AS         = $(CROSS)gcc -x assembler-with-cpp
 CP         = $(CROSS)objcopy
 AR         = $(CROSS)ar
 SZ         = $(CROSS)size
-GDB        = gdb
+GDB        = $(CROSS)gdb
 HEX        = $(CP) -O ihex
 BIN        = $(CP) -O binary
 STFLASH    = st-flash
@@ -33,6 +33,7 @@ ASFLAGS   = -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -Wall -
 CFLAGS    = -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -Wall -fdata-sections -ffunction-sections
 # Generate dependency information
 CFLAGS   += -MD -MP -MF .dep/$(@F).d
+
 # Linker config
 # ARM linker script
 LDSCRIPT  = arm-gcc-link.ld
@@ -50,6 +51,7 @@ SRCS = \
   Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_flash.c \
   Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_flash_ex.c \
   Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_gpio.c \
+  Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_uart.c \
   Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_pwr.c \
   Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_pwr_ex.c \
   Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_rcc.c \
@@ -61,7 +63,6 @@ SRCS = \
   Drivers/BSP/STM32F3-Discovery/stm32f3_discovery_accelerometer.c \
   Drivers/BSP/Components/l3gd20/l3gd20.c \
   Drivers/BSP/Components/lsm303dlhc/lsm303dlhc.c \
-  Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c \
   Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
   Middlewares/Third_Party/FreeRTOS/Source/list.c \
   Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
@@ -73,7 +74,9 @@ SRCS = \
   Src/hardware/stm32f3xx_hal_msp.c \
   Src/hardware/stm32f3xx_it.c \
   Src/hardware/hardware.c \
+  Src/hardware/uart.c \
   Src/task/heartbeat.c \
+  Src/task/cli.c \
   Src/error.c \
   Src/main.c \
 
@@ -91,11 +94,13 @@ C_INCLUDES += -IDrivers/BSP/STM32F3-Discovery
 C_INCLUDES += -IDrivers/BSP/Components
 C_INCLUDES += -IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
 C_INCLUDES += -IMiddlewares/Third_Party/FreeRTOS/Source/include
-C_INCLUDES += -IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS
-C_INCLUDES += -IMiddlewares/Third_Party/FreeRTOS-Plus-CLI/FreeRTOS_CLI
+C_INCLUDES += -IMiddlewares/Third_Party/FreeRTOS-Plus-CLI
 C_INCLUDES += -IDrivers/CMSIS/Include
 C_INCLUDES += -IDrivers/CMSIS/Device/ST/STM32F3xx/Include
 
+## Source code modules
+# Enable UART
+CFLAGS   += -DHAL_UART_MODULE_ENABLED
 
 #######################################
 # End of user configuration.
@@ -138,10 +143,10 @@ $(BUILD_DIR)/$(TARGET_NAME).elf: $(OBJS) Makefile
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(HEX) $< $@
-	
+
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(BIN) $< $@	
-	
+
 $(BUILD_DIR):
 	mkdir -p $@		
 
@@ -155,12 +160,12 @@ burn: flash
 gdb: $(BUILD_DIR)/$(TARGET_NAME).elf
 	rm -f $(BUILD_DIR)/st-util.pid
 	$(START_STOP) -b -m -p $(BUILD_DIR)/st-util.pid $(STUTIL)
-	$(GDB) -ex "target extended localhost:$(GDB_PORT)" -ex "load" $<; $(START_STOP) -K -p $(BUILD_DIR)/st-util.pid; echo "st-util should be stopped"
+	$(GDB) -ex "target remote localhost:$(GDB_PORT)" -ex "load" $<; $(START_STOP) -K -p $(BUILD_DIR)/st-util.pid; echo "st-util should be stopped"
 
 #  Clean up
 clean:
 	-rm -fR .dep $(BUILD_DIR)
-  
+
 # Dependencies
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
 

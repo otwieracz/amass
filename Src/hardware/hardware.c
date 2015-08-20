@@ -3,7 +3,8 @@
 #include "stm32f3xx_hal.h"     /* HAL */
 #include "stm32f3_discovery.h" /* BSP */
 
-#include "hardware.h"
+#include "hardware/hardware.h"
+#include "hardware/uart.h"
 
 void prvSystemClockConfig();
 
@@ -15,6 +16,7 @@ void vHardwareSetup(void)
 
     /* Configure the system clock */
     prvSystemClockConfig();
+    xHardwareUartInit();
 
     /* Initialize all configured peripherals */
     BSP_LED_Init(LED3);
