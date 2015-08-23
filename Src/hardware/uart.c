@@ -66,8 +66,6 @@ BaseType_t xHardwareUartInit(void)
     UartHandle.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
     UartHandle.Init.Mode       = UART_MODE_TX_RX;
 
-    strncpy((char*)&ucTxBuffer, "UART", 5);
-
     prvHardwareUartGpioInit(&UartHandle);
 
     if(HAL_UART_Init(&UartHandle) != HAL_OK)
@@ -87,12 +85,6 @@ BaseType_t xHardwareUartDeinit(void)
 
 BaseType_t xHardwareUartTx(uint8_t* data, uint8_t data_length)
 {
-    /* Check data length */
-    if(data_length > USARTx_TXBUFFERSIZE)
-    {
-        vErrorWarning("UART: Data too long to send");
-        return pdFAIL;
-    }
     if(HAL_UART_Transmit(&UartHandle, data, data_length, USARTx_TIMEOUT) != HAL_OK)
     {
         vErrorWarning("UART: transmit failed");
@@ -101,37 +93,9 @@ BaseType_t xHardwareUartTx(uint8_t* data, uint8_t data_length)
     return pdPASS;
 }
 
-BaseType_t xHardwareUartTxChar(uint8_t data)
-{
-    if(HAL_UART_Transmit(&UartHandle, &data, 1, USARTx_TIMEOUT) != HAL_OK)
-    {
-        vErrorWarning("UART: transmit failed");
-        return pdFAIL;
-    }
-    return pdPASS;
-}
-
-
 BaseType_t xHardwareUartRx(uint8_t* dest, uint8_t data_length)
 {
-    /* Check data length */
-    if(data_length > USARTx_RXBUFFERSIZE)
-    {
-        vErrorWarning("UART: Data too long to recieve");
-        return pdFAIL;
-    }
-
     if(HAL_UART_Receive(&UartHandle, dest, data_length, USARTx_TIMEOUT) != HAL_OK)
-    {
-        vErrorWarning("UART: recieve failed");
-        return pdFAIL;
-    }
-    return pdPASS;
-}
-
-BaseType_t xHardwareUartRxChar(uint8_t* dest)
-{
-    if(HAL_UART_Receive(&UartHandle, dest, 1, USARTx_TIMEOUT) != HAL_OK)
     {
         vErrorWarning("UART: recieve failed");
         return pdFAIL;

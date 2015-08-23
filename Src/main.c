@@ -14,6 +14,9 @@
 #include "task/cli.h"
 #include "task/heartbeat.h"
 
+/* CLI */
+#include "cli/tasks_info.h"
+
 int main(void)
 {
     /* Setup hardware */
@@ -22,6 +25,9 @@ int main(void)
     /* Start tasks */
     vTaskCliStart();
     vTaskHeartbeatStart();
+
+    /* Register CLIs */
+    vCliTasksRegister();
 
     /* Start RTOS scheduler */
     vTaskStartScheduler();

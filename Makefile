@@ -77,6 +77,7 @@ SRCS = \
   Src/hardware/uart.c \
   Src/task/heartbeat.c \
   Src/task/cli.c \
+  Src/cli/tasks_info.c \
   Src/error.c \
   Src/main.c \
 

@@ -11,20 +11,12 @@
 BaseType_t xHardwareUartInit(void);
 BaseType_t xHardwareUartDeinit(void);
 BaseType_t xHardwareUartTx(uint8_t* data, uint8_t data_length);
-BaseType_t xHardwareUartTxChar(uint8_t data);
 BaseType_t xHardwareUartRx(uint8_t* dest, uint8_t data_length);
-BaseType_t xHardwareUartRxChar(uint8_t* dest);
 
 /* Defines */
 
-/* Size of Trasmission buffer */
-#define USARTx_TXBUFFERSIZE              128
-/* Size of Reception buffer */
-#define USARTx_RXBUFFERSIZE              USARTx_TXBUFFERSIZE
 /* Transmission timeout (ms) */
 #define USARTx_TIMEOUT                   -1
-
-#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 
 /* Definition for USARTx clock resources */
 #define USARTx                           USART1
@@ -49,9 +41,6 @@ BaseType_t xHardwareUartRxChar(uint8_t* dest);
 #define USARTx_IRQHandler                USART1_IRQHandler
 
 UART_HandleTypeDef UartHandle;
-
-uint8_t ucTxBuffer[USARTx_TXBUFFERSIZE];
-uint8_t ucRxBuffer[USARTx_RXBUFFERSIZE];
 
 #endif /* _HARDWARE_UART_H */
 
