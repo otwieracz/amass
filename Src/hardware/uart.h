@@ -10,8 +10,8 @@
 /* Exported functions */
 BaseType_t xHardwareUartInit(void);
 BaseType_t xHardwareUartDeinit(void);
-BaseType_t xHardwareUartTx(uint8_t* data, uint8_t data_length);
-BaseType_t xHardwareUartRx(uint8_t* dest, uint8_t data_length);
+BaseType_t xHardwareUartTx(char* data, uint8_t data_length);
+BaseType_t xHardwareUartRx(char* dest, uint8_t data_length);
 
 /* Defines */
 

@@ -14,7 +14,7 @@ void prvTaskHeartbeat(void *pvParameters);
 /* Run LEDs in circle */
 void vTaskHeartbeatStart(void)
 {
-    if(xTaskCreate(prvTaskHeartbeat, "prvTaskHeartbeat", configMINIMAL_STACK_SIZE, NULL, 1, NULL) != pdPASS)
+    if(xTaskCreate(prvTaskHeartbeat, "tHBEAT", configMINIMAL_STACK_SIZE, NULL, 1, NULL) != pdPASS)
     {
         vErrorFatal("prvTaskHeartbeat: Unable to start");
     }

@@ -15,6 +15,7 @@ OPT         = -O0
 #######################################
 # Toolchain configuration
 CROSS      = /usr/gcc-arm-none-eabi-4_9-2015q2/bin/arm-none-eabi-
+CROSS_INC  = /usr/gcc-arm-none-eabi-4_9-2015q2/arm-none-eabi/include
 CC         = $(CROSS)gcc
 AS         = $(CROSS)gcc -x assembler-with-cpp
 CP         = $(CROSS)objcopy
@@ -26,6 +27,7 @@ BIN        = $(CP) -O binary
 STFLASH    = st-flash
 STUTIL     = st-util
 START_STOP = start-stop-daemon
+CTAGS      = ctags
 
 ######################################
 ## Toolchain flags
@@ -66,7 +68,7 @@ SRCS = \
   Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
   Middlewares/Third_Party/FreeRTOS/Source/list.c \
   Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
-  Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_1.c \
+  Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_2.c \
   Middlewares/Third_Party/FreeRTOS/Source/queue.c \
   Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
   Middlewares/Third_Party/FreeRTOS/Source/timers.c \
@@ -99,6 +101,9 @@ C_INCLUDES += -IMiddlewares/Third_Party/FreeRTOS-Plus-CLI
 C_INCLUDES += -IDrivers/CMSIS/Include
 C_INCLUDES += -IDrivers/CMSIS/Device/ST/STM32F3xx/Include
 
+# System include directory for CTAGS
+CTAGS_INCLUDE = "/usr/include/"
+
 ## Source code modules
 # Enable UART
 CFLAGS   += -DHAL_UART_MODULE_ENABLED
@@ -123,7 +128,7 @@ ASFLAGS += $(AS_DEFS) $(AS_INCLUDES) $(OPT)
 CFLAGS  += $(C_DEFS) $(C_INCLUDES) $(OPT)
 
 # default action: build all
-all: $(BUILD_DIR)/$(TARGET_NAME).elf $(BUILD_DIR)/$(TARGET_NAME).hex $(BUILD_DIR)/$(TARGET_NAME).bin
+all: $(BUILD_DIR)/$(TARGET_NAME).elf $(BUILD_DIR)/$(TARGET_NAME).hex $(BUILD_DIR)/$(TARGET_NAME).bin ctags
 
 #######################################
 # Build rules
@@ -161,7 +166,10 @@ burn: flash
 gdb: $(BUILD_DIR)/$(TARGET_NAME).elf
 	rm -f $(BUILD_DIR)/st-util.pid
 	$(START_STOP) -b -m -p $(BUILD_DIR)/st-util.pid $(STUTIL)
-	$(GDB) -ex "target remote localhost:$(GDB_PORT)" -ex "load" $<; $(START_STOP) -K -p $(BUILD_DIR)/st-util.pid; echo "st-util should be stopped"
+	$(GDB) -tui -ex "target remote localhost:$(GDB_PORT)" -ex "load" $<; $(START_STOP) -K -p $(BUILD_DIR)/st-util.pid; echo "st-util should be stopped"
+
+ctags: $(SRCS)
+		$(CTAGS) $(SRCS) $(CROSS_INC)/* $(CTAGS_INCLUDE)/* &> /dev/null
 
 #  Clean up
 clean:
