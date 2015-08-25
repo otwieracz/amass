@@ -41,7 +41,7 @@ static BaseType_t prvCliTaskList(uint8_t *pcWriteBuffer, size_t xWriteBufferLen,
      * writing output to pcWriteBuffer in slices */
     if(pcIntermediateBuffer == NULL)
     {
-        static char* pcListHeader = "Name\tState\tPrio\tStack\tNum\r\n*******************************************\r\n";
+        static char* pcListHeader = "Name\t\tState\tPrio\tStack\tNum\r\n*******************************************\r\n";
         uint8_t numberOfTasks = uxTaskGetNumberOfTasks();
         /* according to FreeRTOS manual, 40 bytes per task should be enough.
          * Here we take 50 bytes per task.

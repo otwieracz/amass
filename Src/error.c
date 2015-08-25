@@ -1,9 +1,12 @@
 /* file: error.c */
 
+#include <string.h>
 #include <stdio.h>
 
-#include "error.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
+#include "error.h"
 #include "hardware/hardware.h"
 #include "hardware/uart.h"
 
@@ -30,14 +33,12 @@ void vErrorFatalLoop(void)
     }
 }
 
-void vErrorFatal(char* comment)
+void vErrorFatal(uint16_t line, char* file, char* message)
 {
-    /* printf("vFatalError: %s\n", comment); */
-    vErrorFatalLoop();
+    vTaskSuspend(NULL);
 }
 
-void vErrorWarning(char* comment)
+void vErrorWarning(char* message)
 {
-    /* printf("vFatalWarning: %s\n", comment); */
 }
 

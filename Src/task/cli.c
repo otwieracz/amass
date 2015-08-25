@@ -26,7 +26,7 @@ void vTaskCliStart(void)
 {
     if(xTaskCreate(prvTaskCli, "tCLI", configMINIMAL_STACK_SIZE, NULL, 1, NULL) != pdPASS)
     {
-        vErrorFatal("prvTaskCli: Unable to start");
+        vErrorFatal(__LINE__, __FILE__, "prvTaskCli: Unable to start");
     }
 }
 

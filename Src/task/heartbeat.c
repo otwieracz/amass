@@ -16,7 +16,7 @@ void vTaskHeartbeatStart(void)
 {
     if(xTaskCreate(prvTaskHeartbeat, "tHBEAT", configMINIMAL_STACK_SIZE, NULL, 1, NULL) != pdPASS)
     {
-        vErrorFatal("prvTaskHeartbeat: Unable to start");
+        vErrorFatal(__LINE__, __FILE__, "prvTaskHeartbeat: Unable to start");
     }
 }
 
