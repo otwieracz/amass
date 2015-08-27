@@ -1,6 +1,6 @@
 ######################################
 ## Basic configuration
-TARGET_NAME = stm32f3+freertos
+TARGET_NAME = amass
 BUILD_DIR   = build
 # Flash offset 
 FLASH       = 0x8000000
@@ -60,6 +60,8 @@ SRCS = \
   Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_rcc_ex.c \
   Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_tim.c \
   Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_tim_ex.c \
+  Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_spi.c \
+  Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_i2c.c \
   Drivers/BSP/STM32F3-Discovery/stm32f3_discovery.c \
   Drivers/BSP/STM32F3-Discovery/stm32f3_discovery_gyroscope.c \
   Drivers/BSP/STM32F3-Discovery/stm32f3_discovery_accelerometer.c \
@@ -79,6 +81,7 @@ SRCS = \
   Src/hardware/uart.c \
   Src/task/heartbeat.c \
   Src/task/cli.c \
+  Src/task/gyro.c \
   Src/cli/tasks_info.c \
   Src/error.c \
   Src/main.c \
@@ -107,6 +110,8 @@ CTAGS_INCLUDE = "/usr/include/"
 ## Source code modules
 # Enable UART
 CFLAGS   += -DHAL_UART_MODULE_ENABLED
+CFLAGS   += -DHAL_I2C_MODULE_ENABLED
+CFLAGS   += -DHAL_SPI_MODULE_ENABLED
 
 #######################################
 # End of user configuration.

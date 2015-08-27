@@ -14,6 +14,16 @@ void prvTaskHeartbeat(void *pvParameters);
 /* Run LEDs in circle */
 void vTaskHeartbeatStart(void)
 {
+    /* Initialize all configured peripherals */
+    BSP_LED_Init(LED3);
+    BSP_LED_Init(LED4);
+    BSP_LED_Init(LED5);
+    BSP_LED_Init(LED6);
+    BSP_LED_Init(LED7);
+    BSP_LED_Init(LED8);
+    BSP_LED_Init(LED9);
+    BSP_LED_Init(LED10);
+
     if(xTaskCreate(prvTaskHeartbeat, "tHBEAT", configMINIMAL_STACK_SIZE, NULL, 1, NULL) != pdPASS)
     {
         vErrorFatal(__LINE__, __FILE__, "prvTaskHeartbeat: Unable to start");

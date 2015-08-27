@@ -70,7 +70,7 @@ BaseType_t xHardwareUartInit(void)
 
     if(HAL_UART_Init(&UartHandle) != HAL_OK)
     {
-        vErrorWarning("UART init failed");
+        vErrorWarning(__LINE__, __FILE__, "UART init failed");
         return pdFAIL;
     }
 
@@ -87,7 +87,7 @@ BaseType_t xHardwareUartTx(char* data, uint8_t data_length)
 {
     if(HAL_UART_Transmit(&UartHandle, (uint8_t*)data, data_length, USARTx_TIMEOUT) != HAL_OK)
     {
-        vErrorWarning("UART: transmit failed");
+        vErrorWarning(__LINE__, __FILE__, "UART: transmit failed");
         return pdFAIL;
     }
     return pdPASS;
@@ -97,7 +97,7 @@ BaseType_t xHardwareUartRx(char* dest, uint8_t data_length)
 {
     if(HAL_UART_Receive(&UartHandle, (uint8_t*)dest, data_length, USARTx_TIMEOUT) != HAL_OK)
     {
-        vErrorWarning("UART: recieve failed");
+        vErrorWarning(__LINE__, __FILE__, "UART: recieve failed");
         return pdFAIL;
     }
     return pdPASS;

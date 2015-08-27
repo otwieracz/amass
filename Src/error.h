@@ -9,7 +9,7 @@
 
 void vErrorFatalLoop(void);
 void vErrorFatal(uint16_t line, char* file, char* message);
-void vErrorWarning(char* comment);
+void vErrorWarning(uint16_t line, char* file, char* message);
 
 #endif /* _ERROR_H */
 

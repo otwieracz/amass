@@ -38,7 +38,7 @@ void vErrorFatal(uint16_t line, char* file, char* message)
     vTaskSuspend(NULL);
 }
 
-void vErrorWarning(char* message)
+void vErrorWarning(uint16_t line, char* file, char* message)
 {
 }
 

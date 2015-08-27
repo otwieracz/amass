@@ -18,8 +18,8 @@ void    prvUartSendPrompt(void);
 void    prvHandleBackspace(void);
 uint8_t prvParseCommand(char* inputBuffer, char* outputBuffer, uint8_t inputBufferSize, uint8_t outputBufferSize);
 
-static const char* pcPromptMessage = "RTOS> ";
-static const char* pcWelcomeMessage = "FreeRTOS.\r\nType \"help\" to view a list of registered commands.\r\n";
+static const char* pcPromptMessage = "AMASS> ";
+static const char* pcWelcomeMessage = "AMASS.\r\nAerial Model Assistace System\r\nType 'help' to view a list of registered commands.\r\n";
 
 
 void vTaskCliStart(void)
