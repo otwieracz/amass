@@ -24,7 +24,7 @@ void vTaskHeartbeatStart(void)
     BSP_LED_Init(LED9);
     BSP_LED_Init(LED10);
 
-    if(xTaskCreate(prvTaskHeartbeat, "tHBEAT", configMINIMAL_STACK_SIZE, NULL, 1, NULL) != pdPASS)
+    if(xTaskCreate(prvTaskHeartbeat, "HBEAT", configMINIMAL_STACK_SIZE, NULL, 1, NULL) != pdPASS)
     {
         vErrorFatal(__LINE__, __FILE__, "prvTaskHeartbeat: Unable to start");
     }

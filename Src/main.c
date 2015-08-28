@@ -14,6 +14,9 @@
 #include "task/cli.h"
 #include "task/heartbeat.h"
 #include "task/gyro.h"
+#include "task/accel.h"
+#include "task/attind.h"
+#include "task/extctrl.h"
 
 /* CLI */
 #include "cli/tasks_info.h"
@@ -25,8 +28,11 @@ int main(void)
 
     /* Start tasks */
     vTaskCliStart();
-    //vTaskHeartbeatStart();
+    vTaskHeartbeatStart();
     vTaskGyroStart();
+    vTaskAccelStart();
+    vTaskAttindStart();
+    vTaskExtCtrlStart();
 
     /* Register CLIs */
     vCliTasksRegister();

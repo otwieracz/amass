@@ -14,17 +14,17 @@
 
 /* Intermediate buffer between text-generating functions
  * and CLI output buffer */
-char* pcIntermediateBuffer = NULL;
+static char* pcIntermediateBuffer = NULL;
 /* pcIntermediateBuffer will be moved as data is being sent in chunks,
  * pcIntermediateBufferHead will point at head to allow freeing */
-char* pcIntermediateBufferHead = NULL;
+static char* pcIntermediateBufferHead = NULL;
 
 static BaseType_t prvCliTaskList(uint8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString);
 
 static const CLI_Command_Definition_t xCliTaskListCommand =
 {
-    "task_list",
-    "task_list:\r\n Lists all tasks in RTOS (disable INT for runtime!)\r\n\r\n",
+    "tasks",
+    "tasks:\r\n Lists all tasks in RTOS (disable INT for runtime!)\r\n\r\n",
     prvCliTaskList,
     0
 };
@@ -41,7 +41,7 @@ static BaseType_t prvCliTaskList(uint8_t *pcWriteBuffer, size_t xWriteBufferLen,
      * writing output to pcWriteBuffer in slices */
     if(pcIntermediateBuffer == NULL)
     {
-        static char* pcListHeader = "Name\t\tState\tPrio\tStack\tNum\r\n*******************************************\r\n";
+        static char* pcListHeader = "Name\t\tState\tPrio\tStack\tNum\r\n*************************************************\r\n";
         uint8_t numberOfTasks = uxTaskGetNumberOfTasks();
         /* according to FreeRTOS manual, 40 bytes per task should be enough.
          * Here we take 50 bytes per task.

@@ -24,7 +24,7 @@ static const char* pcWelcomeMessage = "AMASS.\r\nAerial Model Assistace System\r
 
 void vTaskCliStart(void)
 {
-    if(xTaskCreate(prvTaskCli, "tCLI", configMINIMAL_STACK_SIZE, NULL, 1, NULL) != pdPASS)
+    if(xTaskCreate(prvTaskCli, "CLI", configMINIMAL_STACK_SIZE*3, NULL, 1, NULL) != pdPASS)
     {
         vErrorFatal(__LINE__, __FILE__, "prvTaskCli: Unable to start");
     }

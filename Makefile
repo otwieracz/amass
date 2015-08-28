@@ -82,6 +82,9 @@ SRCS = \
   Src/task/heartbeat.c \
   Src/task/cli.c \
   Src/task/gyro.c \
+  Src/task/accel.c \
+  Src/task/attind.c \
+  Src/task/extctrl.c \
   Src/cli/tasks_info.c \
   Src/error.c \
   Src/main.c \
@@ -112,6 +115,7 @@ CTAGS_INCLUDE = "/usr/include/"
 CFLAGS   += -DHAL_UART_MODULE_ENABLED
 CFLAGS   += -DHAL_I2C_MODULE_ENABLED
 CFLAGS   += -DHAL_SPI_MODULE_ENABLED
+CLFAGS   += -DHAL_CORTEX_MODULE_ENABLED
 
 #######################################
 # End of user configuration.
