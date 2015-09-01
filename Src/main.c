@@ -17,6 +17,7 @@
 #include "task/accel.h"
 #include "task/attind.h"
 #include "task/extctrl.h"
+#include "task/driver.h"
 
 /* CLI */
 #include "cli/tasks_info.h"
@@ -33,6 +34,7 @@ int main(void)
     vTaskAccelStart();
     vTaskAttindStart();
     vTaskExtCtrlStart();
+    vTaskDriverStart();
 
     /* Register CLIs */
     vCliTasksRegister();

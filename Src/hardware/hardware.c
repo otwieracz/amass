@@ -48,3 +48,50 @@ void prvSystemClockConfig(void)
 
 }
 
+void vHardwareTimerSetup(
+        TIM_HandleTypeDef* xTimerHandle,
+        TIM_TypeDef* usTimer,
+        uint32_t ulPeriod,
+        uint32_t ulFrequencyHz)
+{
+    /* Configures Timer with Period == Frequency */
+
+    uint32_t ulTimeBasePrescaler = (uint32_t)(SystemCoreClock / ulFrequencyHz) - 1;
+    xTimerHandle->Instance           = usTimer;
+    xTimerHandle->Init.Period        = ulPeriod;
+    xTimerHandle->Init.Prescaler     = ulTimeBasePrescaler;
+    xTimerHandle->Init.ClockDivision = 0;
+    xTimerHandle->Init.CounterMode   = TIM_COUNTERMODE_UP;
+    
+}
+
+void vHardwareTimerPwmSetup(
+        TIM_HandleTypeDef* xTimerHandle,
+        TIM_OC_InitTypeDef* xTimerPwmConfig,
+        uint8_t usChannel,
+        uint8_t usPolarity,
+        uint32_t ulPulseValue)
+{
+    /* Configure PWM action */
+    xTimerPwmConfig->OCMode     = TIM_OCMODE_PWM1;
+    xTimerPwmConfig->OCPolarity = usPolarity;
+    xTimerPwmConfig->OCFastMode = TIM_OCFAST_DISABLE;
+    xTimerPwmConfig->Pulse      = ulPulseValue;
+
+
+    /* Configure PWM */
+    if(HAL_TIM_PWM_ConfigChannel(xTimerHandle, xTimerPwmConfig, usChannel) != HAL_OK)
+    {
+        /* Configuration Error */
+        vErrorFatal(__LINE__, __FILE__, "Unable to init PWM");
+    }
+
+    /* Start PWM generation */
+    if(HAL_TIM_PWM_Start(xTimerHandle, usChannel) != HAL_OK)
+    {
+        /* Configuration Error */
+        vErrorFatal(__LINE__, __FILE__, "Unable to init PWM");
+    }
+}
+
+

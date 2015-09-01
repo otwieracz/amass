@@ -15,13 +15,20 @@
 #include "task/extctrl.h"
 
 #define PRINT_TIMES 255
+/* Select timer */
+#define TIMX TIM1
+#define __TIMX_CLK_ENABLE() (__TIM1_CLK_ENABLE());
+/* TIM timer ticks for minimal and maximal control input */
+#define EXTCTRL_TIM_COUNT_MIN 100.0f
+#define EXTCTRL_TIM_COUNT_MAX 200.0f
 
-TickType_t xPitchTick    = 0;
-TickType_t xPitchTickTmp = 0;
-TickType_t xRollTick     = 0;
-TickType_t xRollTickTmp  = 0;
-TickType_t xYawTick      = 0;
-TickType_t xYawTickTmp   = 0;
+TickType_t        xPitchTick    = 0;
+TickType_t        xPitchTickTmp = 0;
+TickType_t        xRollTick     = 0;
+TickType_t        xRollTickTmp  = 0;
+TickType_t        xYawTick      = 0;
+TickType_t        xYawTickTmp   = 0;
+TIM_HandleTypeDef xTimeBaseHandle;
 
 void prvTaskExtCtrl(void* pvParameters);
 void prvExtCtrlHandler(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
@@ -34,7 +41,6 @@ static BaseType_t prvTaskExtCtrlDebug(
         uint8_t *pcWriteBuffer,
         size_t xWriteBufferLen,
         const int8_t *pcCommandString);
-
 static const CLI_Command_Definition_t xTaskExtCtrlDebugCommand =
 {
     "extctrl",
@@ -47,10 +53,26 @@ uint8_t ucExtCtrlPrintTimes = 0;
 /* Exported function, to start ExtCtrl */
 void vTaskExtCtrlStart(void)
 {
-    GPIO_InitTypeDef xGpioInitStruct;
+    GPIO_InitTypeDef  xGpioInitStruct;
 
     /* Enable GPIO E */
     __GPIOD_CLK_ENABLE();
+    
+    /* Configure TIMX as a time source for external controls measurements 
+     * Set prescaler to achieve clock equal to 100kHz (to measure time within
+     * 0.01ms range) */
+    __TIMX_CLK_ENABLE();
+    vHardwareTimerSetup(&xTimeBaseHandle, TIMX, 1000000, 100000);
+
+    /* Start timer */
+    if(HAL_TIM_Base_Init(&xTimeBaseHandle) != HAL_OK)
+    {
+        vErrorFatal(__LINE__, __FILE__, "prvTaskExtCtrl: Unable to init TIM1");
+    }
+    if(HAL_TIM_Base_Start_IT(&xTimeBaseHandle) != HAL_OK)
+    {
+        vErrorFatal(__LINE__, __FILE__, "prvTaskExtCtrl: Unable to start TIM1");
+    }
     
     /* Configure GPIO E 0-2 as inputs with pulldown */
     xGpioInitStruct.Pin = (GPIO_PIN_0 |GPIO_PIN_1 |GPIO_PIN_3);
@@ -67,6 +89,7 @@ void vTaskExtCtrlStart(void)
     HAL_NVIC_SetPriority(EXTI3_IRQn, 10, 10);
     HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
+    
     /* Create data container and semaphore */
     xExtCtrlSem = xSemaphoreCreateBinary();
     xSemaphoreTake(xExtCtrlSem, 0);
@@ -88,12 +111,9 @@ void prvTaskExtCtrl(void* pvParameters)
         /* Store value converted from mdps to dps */
         xSemaphoreTake(xExtCtrlSem, 0);
         taskDISABLE_INTERRUPTS();
-        xExtCtrl.pitch = xPitchTick;
-   //     xPitchTick = 0;
-        xExtCtrl.roll  = xRollTick;
-    //    xRollTick = 0;
-        xExtCtrl.yaw   = xYawTick;
-     //   xYawTick = 0;
+        xExtCtrl.pitch = (xPitchTick - EXTCTRL_TIM_COUNT_MIN) / (EXTCTRL_TIM_COUNT_MAX - EXTCTRL_TIM_COUNT_MIN) * 100;
+        xExtCtrl.roll  = (xRollTick - EXTCTRL_TIM_COUNT_MIN) / (EXTCTRL_TIM_COUNT_MAX - EXTCTRL_TIM_COUNT_MIN) * 100;
+        xExtCtrl.yaw   = (xYawTick - EXTCTRL_TIM_COUNT_MIN) / (EXTCTRL_TIM_COUNT_MAX - EXTCTRL_TIM_COUNT_MIN) * 100;
         taskENABLE_INTERRUPTS();
         /* Critical section */
         xSemaphoreGive(xExtCtrlSem);
@@ -112,20 +132,20 @@ void prvExtCtrlHandler(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
         case GPIO_PIN_SET:
             /* Rising edge */
             if(GPIO_Pin == GPIO_PIN_0)
-                xPitchTickTmp = xTaskGetTickCountFromISR();
+                xPitchTickTmp = __HAL_TIM_GetCounter(&xTimeBaseHandle);
             else if(GPIO_Pin == GPIO_PIN_1)
-                xRollTickTmp = xTaskGetTickCountFromISR();
+                xRollTickTmp = __HAL_TIM_GetCounter(&xTimeBaseHandle);
             else if(GPIO_Pin == GPIO_PIN_3)
-                xYawTickTmp = xTaskGetTickCountFromISR();
+                xYawTickTmp = __HAL_TIM_GetCounter(&xTimeBaseHandle);
             break;
         case GPIO_PIN_RESET:
             /* Falling edge */
             if(GPIO_Pin == GPIO_PIN_0)
-                xPitchTick = xTaskGetTickCountFromISR() - xPitchTickTmp;
+                xPitchTick = __HAL_TIM_GetCounter(&xTimeBaseHandle) - xPitchTickTmp;
             else if(GPIO_Pin == GPIO_PIN_1)
-                xRollTick = xTaskGetTickCountFromISR() - xRollTickTmp;
+                xRollTick = __HAL_TIM_GetCounter(&xTimeBaseHandle) - xRollTickTmp;
             else if(GPIO_Pin == GPIO_PIN_3)
-                xYawTick = xTaskGetTickCountFromISR() - xYawTickTmp;
+                xYawTick = __HAL_TIM_GetCounter(&xTimeBaseHandle) - xYawTickTmp;
             break;
         default:
             break;
@@ -162,9 +182,9 @@ static BaseType_t prvTaskExtCtrlDebug(uint8_t *pcWriteBuffer, size_t xWriteBuffe
         snprintf((char*)pcWriteBuffer,
                 xWriteBufferLen,
                 "%6d\t%6d\t%6d\r\n",
-                (int16_t)xExtCtrl.pitch*1000,
-                (int16_t)xExtCtrl.roll*1000,
-                (int16_t)xExtCtrl.yaw*1000);
+                (int16_t)xExtCtrl.pitch,
+                (int16_t)xExtCtrl.roll,
+                (int16_t)xExtCtrl.yaw);
         xSemaphoreGive(xExtCtrlSem);
         HAL_Delay(40);
         ucExtCtrlPrintTimes--;
@@ -180,3 +200,4 @@ static BaseType_t prvTaskExtCtrlDebug(uint8_t *pcWriteBuffer, size_t xWriteBuffe
         return pdFALSE;
     }
 }
+

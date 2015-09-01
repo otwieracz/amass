@@ -13,9 +13,9 @@
 /* Data struct */
 typedef struct
 {
-    float pitch;
-    float roll;
-    float yaw;
+    uint8_t pitch;
+    uint8_t roll;
+    uint8_t yaw;
 } ExtCtrlData;
 
 /* Data container */

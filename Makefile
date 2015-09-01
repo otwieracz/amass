@@ -85,6 +85,7 @@ SRCS = \
   Src/task/accel.c \
   Src/task/attind.c \
   Src/task/extctrl.c \
+  Src/task/driver.c \
   Src/cli/tasks_info.c \
   Src/error.c \
   Src/main.c \
